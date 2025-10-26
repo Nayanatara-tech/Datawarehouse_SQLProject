@@ -41,13 +41,12 @@ CASE WHEN UPPER(trim(cst_gndr))='M' THEN 'Male'
      ELSE 'n/a'
 END AS cst_gndr,
 cst_create_date,
-ROW_NUMBER() OVER(PARTITION BY cst_id order by cst_create_date) as latest_record
+ROW_NUMBER() OVER(PARTITION BY cst_id order by cst_create_date DESC) as latest_record
 FROM [Bronze].[crm_cust_info]
 where cst_id is not null) t
 where latest_record=1
 
 --------checks----
-
 
 
 
