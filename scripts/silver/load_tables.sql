@@ -46,8 +46,49 @@ FROM [Bronze].[crm_cust_info]
 where cst_id is not null) t
 where latest_record=1
 
---------checks----
+SELECT * FROM [Silver].[crm_prd_info]
+ALTER TABLE [Silver].[crm_prd_info]
+ADD cat_id VARCHAR(50)
 
+-----------------------Checks-----------------
+SELECT prd_id,
+count(*)
+from [Bronze].[crm_prd_info]
+group by prd_id
+having count(*)>1
+
+select * from [Bronze].[erp_px_cat_g1v2]
+
+------------------Loading---------------------
+INSERT INTO Silver.crm_prd_info (
+			prd_id,
+			cat_id,
+			prd_key,
+			prd_nm,
+			prd_cost,
+			prd_line,
+			prd_start_dt,
+			prd_end_dt
+		)
+SELECT
+prd_id,
+replace(substring(prd_key,1,5),'-','_') as cat_id,
+SUBSTRING(prd_key, 7, LEN(prd_key)) AS prd_key,
+prd_nm,
+isnull(prd_cost,0) as prd_cost,
+CASE 
+				WHEN UPPER(TRIM(prd_line)) = 'M' THEN 'Mountain'
+				WHEN UPPER(TRIM(prd_line)) = 'R' THEN 'Road'
+				WHEN UPPER(TRIM(prd_line)) = 'S' THEN 'Other Sales'
+				WHEN UPPER(TRIM(prd_line)) = 'T' THEN 'Touring'
+				ELSE 'n/a'
+			END AS prd_line,
+cast(prd_start_dt as date) as prd_start_dt,
+CAST(
+				LEAD(prd_start_dt) OVER (PARTITION BY prd_key ORDER BY prd_start_dt) - 1 
+				AS DATE
+			) AS prd_end_dt
+from [Bronze].[crm_prd_info]
 
 
 
