@@ -1,0 +1,8 @@
+select * from [Silver].[crm_prd_info]
+
+create clustered index product_id_index on [Silver].[crm_prd_info] (prd_id)
+
+select 
+*
+from [Silver].[crm_prd_info]
+where prd_id=253
